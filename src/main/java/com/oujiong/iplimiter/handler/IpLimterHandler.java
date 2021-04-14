@@ -1,5 +1,6 @@
 package com.oujiong.iplimiter.handler;
 
+import cn.edu.idea.util.HttpUtils;
 import com.google.common.base.Preconditions;
 import com.oujiong.iplimiter.annotation.IpLimiter;
 import org.aspectj.lang.ProceedingJoinPoint;
@@ -17,6 +18,7 @@ import org.springframework.scripting.support.ResourceScriptSource;
 import org.springframework.stereotype.Component;
 
 import javax.annotation.PostConstruct;
+import javax.servlet.http.HttpServletRequest;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -49,16 +51,6 @@ public class IpLimterHandler {
         LOGGER.info("IpLimterHandler[分布式限流处理器]脚本加载完成");
     }
 
-    /**
-     * 这个切点可以不要，因为下面的本身就是个注解
-     */
-//    @Pointcut("@annotation(IpLimiter)")
-//    public void rateLimiter() {}
-
-    /**
-     * 如果保留上面这个切点，那么这里可以写成
-     * @Around("rateLimiter()&&@annotation(ipLimiter)")
-     */
     @Around("@annotation(ipLimiter)")
     public Object around(ProceedingJoinPoint proceedingJoinPoint, IpLimiter ipLimiter) throws Throwable {
         if (LOGGER.isDebugEnabled()) {
@@ -72,7 +64,14 @@ public class IpLimterHandler {
          * 获取注解参数
          */
         // 限流模块IP
-        String limitIp = ipLimiter.ipAdress();
+        Object[] args = proceedingJoinPoint.getArgs();
+        String limitIp = null;
+        for (Object arg : args) {
+            if (arg instanceof HttpServletRequest) {
+                limitIp = HttpUtils.getIPAddress((HttpServletRequest) arg);
+                break;
+            }
+        }
         Preconditions.checkNotNull(limitIp);
         // 限流阈值
         long limitTimes = ipLimiter.limit();
@@ -93,7 +92,7 @@ public class IpLimterHandler {
          * 调用脚本并执行
          */
         Long result = (Long) redisTemplate.execute(getRedisScript, ipList, expireTime, limitTimes);
-        if (result == 0) {
+        if (result==null || result == 0) {
             String msg = "由于超过单位时间=" + expireTime + "-允许的请求次数=" + limitTimes + "[触发限流]";
             LOGGER.debug(msg);
             // 达到限流返回给前端信息

@@ -4,7 +4,7 @@ import java.lang.annotation.*;
 
 /**
  * @Description: IP限流注解*
- * @author xub
+ * @author
  * @date 2019/6/4 下午10:20
  */
 @Target(ElementType.METHOD)
@@ -15,7 +15,7 @@ public @interface IpLimiter {
     /**
      * 限流ip
      */
-    String ipAdress() ;
+    String ipAddress() default "" ;
     /**
      * 单位时间限制通过请求数
      */

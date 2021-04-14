@@ -1,0 +1,74 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<configuration>
+    <springProperty scope="context" name="app.name" source="spring.application.name"/>
+    <springProperty scope="context" name="app.profile" source="spring.profiles.active"/>
+    <springProperty scope="context" name="LOG_FILE_PATH" source="logPath"/>
+    <!--格式化输出：%d表示日期，%thread表示线程名，%-5level：级别从左显示5个字符宽度%msg：日志消息，%n是换行符-->
+    <property name="LOG_PRINT_PATTERN" value="%-12(%d{yyyy-MM-dd HH:mm:ss.SSS}) |-%-5level [%thread] %c [%L] -| %msg%n" />
+    <property name="FILE_NAME_PATTERN" value="${LOG_FILE_PATH}/${app.name}/${app.profile}/${app.name}.%d{yyyy-MM-dd}.%i.log" />
+
+    <appender name="COMMON_FILE_APPENDER" class="ch.qos.logback.core.rolling.RollingFileAppender">
+        <encoder class="ch.qos.logback.classic.encoder.PatternLayoutEncoder">
+            <pattern>${LOG_PRINT_PATTERN}</pattern>
+        </encoder>
+        <rollingPolicy class="ch.qos.logback.core.rolling.SizeAndTimeBasedRollingPolicy">
+            <fileNamePattern>${FILE_NAME_PATTERN}</fileNamePattern>
+            <maxHistory>30</maxHistory>
+            <maxFileSize>200MB</maxFileSize>
+        </rollingPolicy>
+    </appender>
+
+    <appender name="COMMON_CONSOLE_APPENDER" class="ch.qos.logback.core.ConsoleAppender">
+        <encoder>
+            <pattern>${LOG_PRINT_PATTERN}</pattern>
+        </encoder>
+    </appender>
+
+    <!-- 本地开发环境 -->
+    <springProfile name="dev">
+        <root level="info">
+            <appender-ref ref="COMMON_FILE_APPENDER" />
+            <appender-ref ref="COMMON_CONSOLE_APPENDER" />
+        </root>
+        <logger name="com.alibaba.nacos" level="warn" />
+        <logger name="org.springframework" level="error"/>
+        <logger name="com.oujiong.iplimiter" level="debug"/>
+    </springProfile>
+    <!-- 开发环境 -->
+    <springProfile name="importMagData">
+        <root level="info">
+            <appender-ref ref="COMMON_FILE_APPENDER" />
+            <appender-ref ref="COMMON_CONSOLE_APPENDER" />
+        </root>
+        <logger name="com.alibaba.nacos" level="warn" />
+        <logger name="org.springframework" level="error"/>
+    </springProfile>
+    <!-- 开发环境 -->
+    <springProfile name="ideaDev">
+        <root level="info">
+            <appender-ref ref="COMMON_FILE_APPENDER" />
+            <appender-ref ref="COMMON_CONSOLE_APPENDER" />
+        </root>
+        <logger name="com.alibaba.nacos" level="warn" />
+        <logger name="org.springframework" level="error"/>
+    </springProfile>
+
+    <!-- 测试环境 -->
+    <springProfile name="test">
+        <root level="info">
+            <appender-ref ref="COMMON_FILE_APPENDER" />
+            <appender-ref ref="COMMON_CONSOLE_APPENDER" />
+        </root>
+        <logger name="com.alibaba.nacos" level="warn" />
+    </springProfile>
+
+    <!-- 生产环境 -->
+    <springProfile name="prod">
+        <root level="info">
+            <appender-ref ref="COMMON_FILE_APPENDER" />
+            <appender-ref ref="COMMON_CONSOLE_APPENDER" />
+        </root>
+        <logger name="com.alibaba.nacos" level="warn" />
+        <logger name="org.springframework" level="error"/>
+    </springProfile>
+</configuration>

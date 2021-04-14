@@ -1,0 +1,23 @@
+logging:
+  level:
+    com:
+      jincou:
+        iplimiter: DEBUG
+logPath: /home/idea/app-logs
+logging.config: classpath:logback-spring.xml
+server:
+  port: 8888
+spring:
+  redis:
+    host: 192.168.230.39
+    jedis:
+      pool:
+        max-active: 8
+        max-idle: 8
+        min-idle: 10
+    port: 6379
+    timeout: 1000ms
+  application:
+    name: iplimiter
+  profiles:
+    active: dev
